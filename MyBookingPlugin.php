@@ -42,9 +42,10 @@
 
  require_once plugin_dir_path(__FILE__) . 'inc' . DIRECTORY_SEPARATOR . 'Admin.php';
  require_once plugin_dir_path(__FILE__) . 'inc' . DIRECTORY_SEPARATOR . 'BookingCalendar.php';
+ $url = plugin_dir_url( __FILE__ );
 
 
  $admin = new Admin();
- $BookingCalendar = new BookingCalendar();
+ $BookingCalendar = new BookingCalendar($url);
 
 ?>

@@ -2,7 +2,8 @@
 class BookingCalendar extends Admin {
     // Class methods here
 
-    public function __construct() {
+    protected $plugin_base_url;
+    public function __construct($plugin_base_url) {
         //display PHP error log
         error_log( 'Hook activated - BookingCalendar construct');
         add_action('admin_enqueue_scripts', [$this, 'admin_enqueue_scripts']);
@@ -11,6 +12,7 @@ class BookingCalendar extends Admin {
         add_action('wp_ajax_update_booking', [$this, 'update_booking']);
         add_action('wp_ajax_delete_booking', [$this, 'delete_booking']);
         add_action('admin_footer', [$this, 'add_availability_modal']);
+        $this->plugin_base_url = $plugin_base_url;
     }
 
 
@@ -185,12 +187,9 @@ public function add_availability_modal() {
 
     ?>
     <div id="booking-modal" style="display: none;">
-    <h2>Add Booking Times for <span id="selected-date"></span></h2>
-    <div id="booking-slots-container">
-        </div>
-    <button id="add-booking-slot">Add Time Slot</button>  
-    <button id="save-bookings">Save</button>
-    <button id="close-modal">Close</button>
+        <h2>Add Booking Time <span id="selected-date"></span></h2>
+        <input  id="time" type="text" name="time" value="" />
+        <input  id="date" type="hidden" name="date" value="" />
     </div>
 
     <?php
@@ -201,11 +200,16 @@ public function add_availability_modal() {
 
 
         // Enqueue FullCalendar script from CDN
-        wp_register_script('fullcalendar', 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js', array('jquery', ), '1', true);
+        wp_register_script('fullcalendar', 'https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js', array('jquery'), null, true);
     
         // Enqueue your custom admin.js script
         wp_register_script('mybookingplugin-calendar-js', plugins_url('assets/js/calendar.js', __DIR__), array('jquery', 'fullcalendar', 'jquery-ui-dialog'), '1', true);
-    
+        
+        wp_register_script('timepicker', '//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.js', array('jquery'), null, true);
+
+        wp_register_style('timepicker-style', '//cdnjs.cloudflare.com/ajax/libs/timepicker/1.3.5/jquery.timepicker.min.css', [], null);
+
+        wp_register_style('mybookingstyles', $this->plugin_base_url.'assets/css/styles.css', [], null);
         // Localize the script with nonce and ajax URL
         wp_localize_script(
             'mybookingplugin-calendar-js', // The handle of the enqueued script
@@ -216,17 +220,19 @@ public function add_availability_modal() {
                 
             )
         );
-        
 
-        var_dump($hook, 'cvorrect123');
+        
         // Check to make sure we're on the correct admin page
         if ('booking-settings_page_set_availability' !== $hook) {
             return;
         }
-        var_dump('check1234');
+
         wp_enqueue_script('fullcalendar');
         wp_enqueue_script('mybookingplugin-calendar-js');
         wp_enqueue_style('wp-jquery-ui-dialog');
+        wp_enqueue_style('timepicker-style');
+        wp_enqueue_script('timepicker');
+        wp_enqueue_style('mybookingstyles');
     }
     
     
