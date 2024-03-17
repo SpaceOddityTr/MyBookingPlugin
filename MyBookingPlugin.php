@@ -76,5 +76,3 @@ $publicSide = new PublicSide('MyBookingPlugin', '1', $booking, $url, $rootDir);
 $eMail = new EMail($booking);
 
 add_shortcode('my_booking_form', [$publicSide, 'renderShortcode']);
-
-?>

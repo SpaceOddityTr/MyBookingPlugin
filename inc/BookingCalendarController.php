@@ -197,5 +197,3 @@ class BookingCalendarController extends Admin
     
     
 }
-
-?>
