@@ -7,7 +7,7 @@ class BookingCalendar extends Admin {
         //display PHP error log
         error_log( 'Hook activated - BookingCalendar construct');
         add_action('admin_enqueue_scripts', [$this, 'admin_enqueue_scripts']);
-        add_action('wp_ajax_get_all_bookings', [$this, 'get_all_available_bookings']);
+
         add_action('wp_ajax_add_booking', [$this, 'add_booking']);
         add_action('wp_ajax_update_booking', [$this, 'update_booking']);
         add_action('wp_ajax_delete_booking', [$this, 'delete_booking']);
@@ -50,17 +50,7 @@ class BookingCalendar extends Admin {
         wp_die(); // this is required to terminate immediately and return a proper response
     }
 
-    public function get_all_available_bookings() {
-        //display PHP error log
-        error_log( 'Hook activated - get  all available bookings');
 
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'bookings'; // Assuming 'bookings' is your table name
-    
-        $bookings = $wpdb->get_results("SELECT * FROM $table_name WHERE service_id = 0 and	client_name = 0 and	client_email = 0") ; 
-    
-        return $bookings;
-    }
     
 
 
@@ -81,7 +71,7 @@ public function update_booking() {
     $booking_id = isset($_POST['booking_id']) ? intval($_POST['booking_id']) : 0;
     $date = sanitize_text_field($_POST['date']);
     $time = sanitize_text_field($_POST['time']);
-    $service_id = isset($_POST['service_id']) ? intval($_POST['service_id']) : 0;
+    $service = isset($_POST['service_id']) ? intval($_POST['service_id']) : 0;
     $client_name = sanitize_text_field($_POST['client_name']);
     $client_email = sanitize_email($_POST['client_email']);
 
@@ -91,7 +81,7 @@ public function update_booking() {
         [ // Data to update
             'date' => $date,
             'time' => $time,
-            'service_id' => $service_id,
+            'service_id' => $service,
             'client_name' => $client_name,
             'client_email' => $client_email,
         ],

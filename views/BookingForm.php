@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Booking Form</title>  
-    <link rel="stylesheet" href="booking.css"> 
-</head> 
-<body>
+
     <div class="my-booking-plugin-container">
         <div class="my-booking-plugin-header">
             <h2>Book Your Service</h2>
@@ -24,15 +18,6 @@
                 </select>
             </div>
 
-            <div class="form-group">
-                <label for="my-booking-date">Date:</label>
-                <input type="date" id="my-booking-date" name="date" required>
-            </div>
-
-            <div class="form-group">
-                <label for="my-booking-time">Time:</label>
-                <input type="time" id="my-booking-time" name="time" required>
-            </div>
 
             <div class="form-group">
                 <label for="my-booking-name">Your Name:</label>
@@ -48,6 +33,4 @@
                 <input type="submit" value="Book Now">
             </div>
         </form> 
-    </div>   
-</body>
-</html>
+    </div>

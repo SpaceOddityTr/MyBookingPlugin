@@ -18,6 +18,7 @@ class Booking {
         add_action('admin_post_handle_booking_form_submission', [$this, 'handle_booking_form_submission']);
         add_action('admin_post_nopriv_handle_booking_form_submission', [$this, 'handle_booking_form_submission']); // Handle for non-logged in users (optional)
         add_shortcode('display_booking_form', [$this, 'display_booking_form']);
+        add_action('wp_ajax_get_all_bookings', [$this, 'print_all_available_bookings']);
     }
 
     /**
@@ -34,17 +35,17 @@ class Booking {
 
         // Sanitize all input data
         $service = sanitize_text_field($_POST['service']);
-        $date = sanitize_text_field($_POST['date']);
-        $time = sanitize_text_field($_POST['time']);
-        $name = sanitize_text_field($_POST['name']);
-        $email = sanitize_email($_POST['email']);
+        $booking_id = sanitize_text_field($_POST['booking_id']);
+        $client_name = sanitize_text_field($_POST['name']);
+        $client_email = sanitize_email($_POST['email']);
+
 
         // Perform data validation
-        $validation_result = $this->validate_booking_data($service, $date, $time, $name, $email);
+        $validation_result = $this->validate_booking_data($service, $booking_id, $client_name, $client_email);
 
         if ($validation_result === true) {
             // Save booking if validation passes
-            if ($this->save_booking($service, $date, $time, $name, $email)) {
+            if ($this->update_booking($service, $booking_id, $client_name, $client_email)) {
                 // Redirect on successful booking
                 wp_redirect(add_query_arg(['booking_status' => 'success'], home_url()));
                 exit;
@@ -64,13 +65,12 @@ class Booking {
      * Validates the booking form data.
      *
      * @param string $service The selected service
-     * @param string $date The booking date
-     * @param string $time The booking time
+
      * @param string $name The customer's name
      * @param string $email The customer's email address
      * @return bool|array True if data is valid, otherwise an array of error messages
      */
-    private function validate_booking_data($service, $date, $time, $name, $email) {
+    private function validate_booking_data($service, $booking_id, $name, $email) {
         $errors = [];
 
         // Service validation
@@ -78,16 +78,9 @@ class Booking {
             $errors[] = __('Invalid service selected.', 'mybookingplugin');
         }
 
-        // Date validation (using DateTime for accurate validation)
-        try {
-            $bookingDate = new DateTime($date);
-        } catch (Exception $e) {
-            $errors[] = __('Invalid date format.', 'mybookingplugin');
-        }
 
-        // Time validation (with a simple regular expression check)
-        if (empty($time) || !preg_match('/^\d{2}:\d{2}$/', $time)) {
-            $errors[] = __('Invalid time format.', 'mybookingplugin');
+        if (empty($booking_id)) {
+            $errors[] = __('booking_id is required.', 'mybookingplugin');
         }
 
         // Name validation
@@ -108,37 +101,51 @@ class Booking {
      * Saves the booking data as a custom post type.
      *
      * @param string $service The selected service
-     * @param string $date The booking date
-     * @param string $time The booking time
+     * @param int $booking_id
      * @param string $name The customer's name
      * @param string $email The customer's email address
      * @return bool True on success, false on error
      */
-    private function save_booking($service, $date, $time, $name, $email) {
-        // Prepare Booking Data
-        $booking_data = [ 
-            'post_title'   => wp_strip_all_tags("Booking for $name"), 
-            'post_content' => "Service: $service\nDate: $date\nTime: $time\nEmail: $email",
-            'post_status'  => 'publish',
-            'post_type'    => 'booking', 
-            'meta_input'   => [
-                'service' => $service, 
-                'date'    => $date,
-                'time'    => $time, 
-                'name'    => $name,
-                'email'   => $email
-            ]
-        ];
-
-        $post_id = wp_insert_post($booking_data); 
+    private function update_booking($booking_id, $service, $client_name, $client_email) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'bookings';
+        // Update data
+        $result = $wpdb->update(
+            $table_name,
+            [ // Data to update
+                'service_id' => $service,
+                'client_name' => $client_name,
+                'client_email' => $client_email,
+            ],
+            [ 'ID' => $booking_id ] // Where clause
+        );
 
         // Handle potential errors
-        if (is_wp_error($post_id)) {
-            error_log('Booking save error: ' . $post_id->get_error_message());
+        if ($result === false) {
+            error_log('Booking save error');
             return false; // Save failed
         }
 
         return true; // Save successful
+    }
+
+    public function get_all_available_bookings() {
+        //display PHP error log
+        error_log( 'Hook activated - get  all available bookings');
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'bookings'; // Assuming 'bookings' is your table name
+    
+        $bookings = $wpdb->get_results("SELECT * FROM $table_name WHERE service_id = 0 and	client_name = 0 and	client_email = 0") ; 
+    
+        return $bookings;
+    }
+
+    public function print_all_available_bookings() {
+        check_ajax_referer('mybookingplugin_front_nonce', 'security');
+        $bookings = $this->get_all_available_bookings();
+        wp_send_json_success(['bookings' => $bookings]);
+        wp_die();
     }
 
     /**

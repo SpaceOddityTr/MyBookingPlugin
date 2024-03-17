@@ -64,14 +64,9 @@ $url = plugin_dir_url(__FILE__);
 $admin = new Admin();
 $bookingCalendar = new BookingCalendar($url);
 $booking = new Booking();
-$publicSide = new PublicSide($BookingCalendar, $Booking);
+$publicSide = new PublicSide('MyBookingPlugin', '1', $booking, $url);
 $eMail = new EMail();
 
-// Shortcode to display the booking form
-function my_booking_shortcode_callback() {
-    global $my_booking_plugin_booking; 
-    $my_booking_plugin_booking->display_booking_form_shortcode();
-}
-add_shortcode('my_booking_form', 'my_booking_shortcode_callback');
+add_shortcode('my_booking_form', [$publicSide, 'renderShortcode']);
 
 ?>

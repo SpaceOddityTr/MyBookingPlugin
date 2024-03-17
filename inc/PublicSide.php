@@ -11,7 +11,9 @@ class PublicSide {
      *
      * @var string
      */
-    private $pluginSlug;
+    private $pluginCode;
+
+    private $url;
 
     /**
      * The current version of the plugin.
@@ -20,15 +22,20 @@ class PublicSide {
      */
     private $version;
 
+    /** @var Booking */
+    private $booking;
+
     /**
      * Initialize the class and set its properties.
      *
-     * @param string $pluginSlug The unique identifier of this plugin.
+     * @param string $pluginCode The unique identifier of this plugin.
      * @param string $version The current version of the plugin.
      */
-    public function __construct($pluginSlug, $version) {
-        $this->pluginSlug = $pluginSlug;
+    public function __construct(string $pluginCode, string $version, Booking $booking, string $url) {
+        $this->url = $url;
+        $this->pluginCode = $pluginCode;
         $this->version = $version;
+        $this->booking = $booking;
         add_action('wp_enqueue_scripts', [$this, 'enqueueStyles']);
         add_action('wp_enqueue_scripts', [$this, 'enqueueScripts']);
     }
@@ -40,8 +47,8 @@ class PublicSide {
      */
     public function enqueueStyles() {
         wp_enqueue_style(
-            $this->pluginSlug . '-style',
-            plugin_dir_url(__FILE__) . 'assets/css/public.css',
+            $this->pluginCode . '-style',
+            $this->url.'assets/css/booking.css',
             array(), // Dependencies
             $this->version,
             'all'
@@ -53,8 +60,8 @@ class PublicSide {
      */
     public function enqueueScripts() {
         wp_enqueue_script(
-            $this->pluginSlug . '-script',
-            plugin_dir_url(__FILE__) . 'assets/js/public.js',
+            $this->pluginCode . '-script',
+            $this->url.'assets/js/public.js',
             array('jquery'), // Dependencies
             $this->version,
             true
@@ -63,9 +70,10 @@ class PublicSide {
         // Localize the script with new data
         $translation_array = array(
             'ajax_url' => admin_url('admin-ajax.php'),
+            'security' => wp_create_nonce('mybookingplugin_front_nonce'),
             // Additional data can be added here
         );
-        wp_localize_script($this->pluginSlug . '-script', $this->pluginSlug, $translation_array);
+        wp_localize_script($this->pluginCode . '-script', $this->pluginCode, $translation_array);
     }
 
     /**
@@ -74,4 +82,10 @@ class PublicSide {
     public function displayBookingForm() {
         include_once __DIR__ . '/../views/BookingForm.php';
     }
+
+    // Shortcode to display the booking form
+    public function renderShortcode() {
+       echo  $this->booking->display_booking_form();
+    }
+
 }
