@@ -41,7 +41,7 @@ class PublicSide {
     public function enqueueStyles() {
         wp_enqueue_style(
             $this->pluginSlug . '-style',
-            plugin_dir_url(__FILE__) . 'css/my-booking-plugin-public.css',
+            plugin_dir_url(__FILE__) . 'assets/css/public.css',
             array(), // Dependencies
             $this->version,
             'all'
@@ -54,7 +54,7 @@ class PublicSide {
     public function enqueueScripts() {
         wp_enqueue_script(
             $this->pluginSlug . '-script',
-            plugin_dir_url(__FILE__) . 'js/my-booking-plugin-public.js',
+            plugin_dir_url(__FILE__) . 'assets/js/public.js',
             array('jquery'), // Dependencies
             $this->version,
             true

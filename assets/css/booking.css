@@ -1,0 +1,92 @@
+/* General Styles for the Booking Form */
+.my-booking-plugin-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif; /* Example font */
+}
+
+.my-booking-plugin-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.my-booking-plugin-header h2 { /* More prominent header */
+    font-size: 1.3em;
+    font-weight: bold; 
+}
+
+.my-booking-plugin-form {
+    display: flex;
+    flex-direction: column; 
+    gap: 20px;
+}
+
+.my-booking-plugin-form .form-group {
+    margin-bottom: 15px;
+}
+
+.my-booking-plugin-form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.my-booking-plugin-form input,
+.my-booking-plugin-form select { 
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.my-booking-plugin-form input[type="submit"] {
+    background-color: #0073aa;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.my-booking-plugin-form input[type="submit"]:hover,
+.my-booking-plugin-form input[type="submit"]:focus {
+    background-color: #005177; /* More noticeable hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) { 
+    .my-booking-plugin-container {
+        width: 90%; 
+    	padding: 10px; /* Reduced padding */
+    }
+
+    .my-booking-plugin-form {
+        gap: 15px; 
+    }
+}
+
+/* Error and Success Messages */
+.my-booking-plugin-message {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.my-booking-plugin-message-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.my-booking-plugin-message-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}

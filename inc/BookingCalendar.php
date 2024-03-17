@@ -64,42 +64,48 @@ class BookingCalendar extends Admin {
     
 
 
-    public function update_booking() {
-        //display PHP error log
-        error_log( 'Hook activated - update booking');
+public function update_booking() {
+    // Display PHP error log
+    error_log( 'Hook activated - update booking');
 
-        if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'update_booking_nonce' ) ) {
-            wp_send_json_error( [ 'message' => 'Nonce verification failed' ] );
-            return;
-        }
-    
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'bookings';
-    
-        $booking_id = isset($_POST['booking_id']) ? intval($_POST['booking_id']) : 0;
-        $date = sanitize_text_field($_POST['date']);
-        $time = sanitize_text_field($_POST['time']);
-        // Add more fields as necessary
-
-
-        //update service_id	client_name	client_email
-        
-        $result = $wpdb->update(
-            $table_name,
-            [ // Data to update
-                'date' => $date,
-                'time' => $time,
-                // ... other fields
-            ],
-            [ 'ID' => $booking_id ] // Where clause
-        );
-    
-        if ( $result ) {
-            wp_send_json_success( [ 'message' => 'Booking updated successfully' ] );
-        } else {
-            wp_send_json_error( [ 'message' => 'Failed to update booking' ] );
-        }
+    // Nonce verification
+    if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'update_booking_nonce' ) ) {
+        wp_send_json_error( [ 'message' => 'Nonce verification failed' ] );
+        return;
     }
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bookings';
+
+    // Sanitize input data
+    $booking_id = isset($_POST['booking_id']) ? intval($_POST['booking_id']) : 0;
+    $date = sanitize_text_field($_POST['date']);
+    $time = sanitize_text_field($_POST['time']);
+    $service_id = isset($_POST['service_id']) ? intval($_POST['service_id']) : 0;
+    $client_name = sanitize_text_field($_POST['client_name']);
+    $client_email = sanitize_email($_POST['client_email']);
+
+    // Update data
+    $result = $wpdb->update(
+        $table_name,
+        [ // Data to update
+            'date' => $date,
+            'time' => $time,
+            'service_id' => $service_id,
+            'client_name' => $client_name,
+            'client_email' => $client_email,
+        ],
+        [ 'ID' => $booking_id ] // Where clause
+    );
+
+    // Response based on update result
+    if ( $result !== false ) {
+        wp_send_json_success( [ 'message' => 'Booking updated successfully' ] );
+    } else {
+        wp_send_json_error( [ 'message' => 'Failed to update booking' ] );
+    }
+}
+
 
     public function delete_booking() {
         //display PHP error log
