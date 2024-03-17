@@ -1,163 +1,193 @@
 <?php
 /**
+ * A model that represents a booking.
+ * 
  * @package MyBookingPlugin
  */
-class Booking {
-    /**
-     * List of valid services offered.
-     *
-     * @var array
-     */
-    private $valid_services = ['essential_oils', 'psychosomatics'];
+class Booking
+{
 
-    /**
-     * Constructor for the booking class.
-     */
-    public function __construct() {
-        // Hook into WordPress events to handle form submission and display the shortcode
-        add_action('admin_post_handle_booking_form_submission', [$this, 'handle_booking_form_submission']);
-        add_action('admin_post_nopriv_handle_booking_form_submission', [$this, 'handle_booking_form_submission']); // Handle for non-logged in users (optional)
-        add_shortcode('display_booking_form', [$this, 'display_booking_form']);
-        add_action('wp_ajax_get_all_bookings', [$this, 'print_all_available_bookings']);
-    }
+    protected $tableName = 'bookings';
 
-    /**
-     * Handles the submission of the booking form.
-     */
-    public function handle_booking_form_submission() {
-        // Capability check (adjust the capability as needed)
-        if (!current_user_can('book_services')) {
-            wp_die(__('You do not have permission to submit this form.', 'mybookingplugin'));
-        }
+    protected $fieldNames = [
+        'id',
+        'date',
+        'time',
+        'service_name',
+        'client_name',
+        'client_email',
+    ];
 
-        // Security check (nonce validation)
-        check_admin_referer('my_booking_plugin_booking_action', 'my_booking_plugin_nonce');
+    protected $validServiceNames = [
+        'essential_oils',
+        'psychosomatics',
+    ];
 
-        // Sanitize all input data
-        $service = sanitize_text_field($_POST['service']);
-        $booking_id = sanitize_text_field($_POST['booking_id']);
-        $client_name = sanitize_text_field($_POST['name']);
-        $client_email = sanitize_email($_POST['email']);
-
-
-        // Perform data validation
-        $validation_result = $this->validate_booking_data($service, $booking_id, $client_name, $client_email);
-
-        if ($validation_result === true) {
-            // Save booking if validation passes
-            if ($this->update_booking($service, $booking_id, $client_name, $client_email)) {
-                // Redirect on successful booking
-                wp_redirect(add_query_arg(['booking_status' => 'success'], home_url()));
-                exit;
-            } else {
-                // Redirect on booking save error
-                wp_redirect(add_query_arg(['booking_status' => 'error'], home_url()));
-                exit;
-            }
-        } else {
-            // Redirect with validation errors
-            wp_redirect(add_query_arg(['booking_errors' => implode(',', $validation_result)], home_url()));
-            exit;
-        }
-    }
-
-    /**
-     * Validates the booking form data.
-     *
-     * @param string $service The selected service
-
-     * @param string $name The customer's name
-     * @param string $email The customer's email address
-     * @return bool|array True if data is valid, otherwise an array of error messages
-     */
-    private function validate_booking_data($service, $booking_id, $name, $email) {
-        $errors = [];
-
-        // Service validation
-        if (empty($service) || !in_array($service, $this->valid_services)) {
-            $errors[] = __('Invalid service selected.', 'mybookingplugin');
-        }
-
-
-        if (empty($booking_id)) {
-            $errors[] = __('booking_id is required.', 'mybookingplugin');
-        }
-
-        // Name validation
-        if (empty($name)) {
-            $errors[] = __('Name is required.', 'mybookingplugin');
-        }
-
-        // Email validation
-        if (empty($email) || !is_email($email)) {
-            $errors[] = __('Invalid email address.', 'mybookingplugin');
-        }
-
-        // Return the result
-        return empty($errors) ? true : $errors; 
-    }
-
-    /**
-     * Saves the booking data as a custom post type.
-     *
-     * @param string $service The selected service
-     * @param int $booking_id
-     * @param string $name The customer's name
-     * @param string $email The customer's email address
-     * @return bool True on success, false on error
-     */
-    private function update_booking($booking_id, $service, $client_name, $client_email) {
+    public function create(array $data): void
+    {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'bookings';
-        // Update data
+
+        $table_name = $this->getTableName();
+        $data = $this->getFieldValues($data);
+
+        // Only specific service names allowed
+        if (array_key_exists('service_name', $data)) {
+            $this->validateServiceName($data['service_name']);
+        }
+
+        $result = $wpdb->insert($table_name, $data);
+
+        if ($result === false) {
+            throw new RuntimeException(sprintf('Failed to create booking'));
+        }
+    }
+
+    /**
+     * @param int $bookingId The ID of the booking to update.
+     * @param array $data A map of the field names for update, to their values.
+     * 
+     * @throws RuntimeException If problem updating.
+     */
+    public function update(int $bookingId, array $data): void
+    {
+        global $wpdb;
+        
+        $data = $this->getFieldValues($data);
+
+        // Disallow ID for update
+        if (array_key_exists('id', $data)) {
+            unset($data['id']);
+        }
+        
+        // Only specific service names allowed
+        if (array_key_exists('service_name', $data)) {
+            $this->validateServiceName($data['service_name']);
+        }
+
         $result = $wpdb->update(
-            $table_name,
-            [ // Data to update
-                'service_id' => $service,
-                'client_name' => $client_name,
-                'client_email' => $client_email,
-            ],
-            [ 'ID' => $booking_id ] // Where clause
+            $this->getTableName(),
+            $data,
+            [ 'ID' => $bookingId ] // Where clause
         );
 
-        // Handle potential errors
         if ($result === false) {
-            error_log('Booking save error');
-            return false; // Save failed
+            throw new RuntimeException(sprintf('Failed to update booking #%1$s', $bookingId));
+        }
+    }
+
+    public function delete(int $bookingId): void
+    {
+        global $wpdb;
+        $table_name = $this->getTableName();
+        
+        $result = $wpdb->delete(
+            $table_name,
+            [ 'ID' => $bookingId ] // Where clause
+        );
+
+        if ($result === false) {
+            throw new RuntimeException(sprintf('Could not delete bookin #%1$s', $bookingId));
+        }
+    }
+
+    public function get(int $bookingId): array
+    {
+        global $wpdb;
+        $table_name = $this->getTableName();
+        $query = <<<EOF
+        SELECT * FROM `{$table_name}`
+        WHERE `id` = {$bookingId}
+        EOF;
+
+        $result = $wpdb->get_row($query, ARRAY_A);
+
+        if ($result === false) {
+            throw new OutOfRangeException(sprintf('Could not retrieve booking #%1$s', $bookingId));
         }
 
-        return true; // Save successful
+        return $result;
     }
 
-    public function get_all_available_bookings() {
-        //display PHP error log
-        error_log( 'Hook activated - get  all available bookings');
-
+    public function getAll(?string $startDate = null, ?string $endDate = null): array
+    {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'bookings'; // Assuming 'bookings' is your table name
+        $table_name = $this->getTableName();
     
-        $bookings = $wpdb->get_results("SELECT * FROM $table_name WHERE service_id = 0 and	client_name = 0 and	client_email = 0") ; 
-    
-        return $bookings;
+        $query = <<<EOF
+        SELECT *
+        FROM `{$table_name}`
+        EOF;
+        $dateWhereClause = $this->getDateWhereClause($startDate, $endDate);
+        $query .= strlen($dateWhereClause)
+            ? " AND ({$dateWhereClause})"
+            : $dateWhereClause;
+
+        return  $wpdb->get_results($query, ARRAY_A);
     }
 
-    public function print_all_available_bookings() {
-        check_ajax_referer('mybookingplugin_front_nonce', 'security');
-        $bookings = $this->get_all_available_bookings();
-        wp_send_json_success(['bookings' => $bookings]);
-        wp_die();
+    public function getAvailable(?string $startDate = null, ?string $endDate = null): array
+    {
+        global $wpdb;
+        $table_name = $this->getTableName();
+    
+        $query = <<<EOF
+        SELECT *
+        FROM `{$table_name}`
+        WHERE `service_name` IS NULL
+            AND `client_name` IS NULL
+            AND `client_email` IS NULL
+        EOF;
+        $dateWhereClause = $this->getDateWhereClause($startDate, $endDate);
+        $query .= strlen($dateWhereClause)
+            ? " AND ({$dateWhereClause})"
+            : $dateWhereClause;
+
+        return  $wpdb->get_results($query, ARRAY_A);
     }
 
     /**
-     * Renders the booking form using output buffering.
-     *
-     * @return string The HTML for the booking form 
+     * Retrieves the table name used by this model.
      */
-    public function display_booking_form() {
-        ob_start();
-        include plugin_dir_path(__FILE__) . '/../views/BookingForm.php';
-        $form_html = ob_get_clean();
-        $form_html = str_replace('[form_action]', admin_url('admin-post.php'), $form_html);
-        return $form_html;
+    protected function getTableName(): string
+    {
+        global $wpdb;
+        return $wpdb->prefix . $this->tableName;
+    }
+
+    /**
+     * Retrieves only the model's field values from a data array.
+     */
+    protected function getFieldValues(array $data): array
+    {
+        $values = [];
+        foreach ($this->fieldNames as $fieldName) {
+            if (array_key_exists($fieldName, $data)) {
+                $values[$fieldName] = $data[$fieldName];
+            }
+        }
+
+        return $values;
+    }
+
+    protected function validateServiceName(string $serviceName): void
+    {
+        if (!in_array($serviceName, $this->validServiceNames)) {
+            throw new RangeException(sprintf('Service name "%1$s" is not allowed', $serviceName));
+        }
+    }
+
+    protected function getDateWhereClause(?string $startDate = null, ?string $endDate = null): string
+    {
+        $conditions = [];
+
+        if ($startDate !== null) {
+            $conditions[] = "`date` >= {$startDate}";
+        }
+
+        if ($startDate !== null) {
+            $conditions[] = "`date` < {$endDate}";
+        }
+
+        return implode(' AND ', $conditions);
     }
 }

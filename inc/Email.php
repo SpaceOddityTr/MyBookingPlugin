@@ -10,20 +10,28 @@ class Email {
      *
      * @var string
      */
-    private $contentType = 'text/html; charset=UTF-8';
+    protected $contentType = 'text/html; charset=UTF-8';
 
     /**
      * Email headers.
      *
      * @var array
      */
-    private $headers = [];
+    protected $headers = [];
+
+    protected $booking;
 
     /**
      * Class constructor.
      */
-    public function __construct() {
+    public function __construct(Booking $booking) {
         $this->headers[] = $this->contentType;
+        $this->booking = $booking;
+
+        add_action('my_bookings_plugin_booking_added', function (int $bookingId) {
+            $booking = $this->booking->get($bookingId);
+            $this->sendBookingConfirmation($booking);
+        });
     }
 
     /**
@@ -33,37 +41,35 @@ class Email {
      * @param string $subject Email subject.
      * @param string $message Email message.
      * @param array $additionalHeaders (optional) Additional email headers.
-     * @return bool Whether the email was sent successfully.
+     * 
+     * @throws RuntimeException If problem sending.
      */
     public function sendEmail($to, $subject, $message, array $additionalHeaders = []) {
         $headers = array_merge($this->headers, $additionalHeaders);
 
         if (!is_email($to)) {
-            error_log("Invalid email address: {$to}");
-            return false;
+            throw new RangeException("Invalid email address: {$to}");
         }
 
-        $sent = wp_mail($to, $subject, $message, $headers);
-
-        if (!$sent) {
-            error_log("Failed to send email to: {$to}");
+        if (!wp_mail($to, $subject, $message, $headers)) {
+            // Use again when server able to send email
+            // throw new RuntimeException("Failed to send email to: {$to}");
         }
-
-        return $sent;
     }
 
     /**
      * Prepares and sends a booking confirmation email.
      *
-     * @param array $bookingDetails Details of the booking.
-     * @return bool Whether the email was sent successfully.
+     * @param array $booking Details of the booking.
+     * 
+     * @throws RuntimeException If problem sending.
      */
-    public function sendBookingConfirmation(array $bookingDetails) {
-        $to = $bookingDetails['email'];
+    public function sendBookingConfirmation(array $booking) {
+        $to = $booking['client_email'];
         $subject = __('Your Booking Confirmation', 'mybookingplugin');
-        $message = $this->getBookingConfirmationMessage($bookingDetails);
+        $message = $this->getBookingConfirmationMessage($booking);
 
-        return $this->sendEmail($to, $subject, $message);
+        $this->sendEmail($to, $subject, $message);
     }
 
     /**
@@ -73,8 +79,8 @@ class Email {
      * @return string The email message.
      */
     protected function getBookingConfirmationMessage(array $bookingDetails) {
-        $name = htmlspecialchars($bookingDetails['name'], ENT_QUOTES, 'UTF-8');
-        $service = htmlspecialchars($bookingDetails['service'], ENT_QUOTES, 'UTF-8');
+        $name = htmlspecialchars($bookingDetails['client_name'], ENT_QUOTES, 'UTF-8');
+        $service = htmlspecialchars($bookingDetails['service_name'], ENT_QUOTES, 'UTF-8');
         $date = htmlspecialchars($bookingDetails['date'], ENT_QUOTES, 'UTF-8');
         $time = htmlspecialchars($bookingDetails['time'], ENT_QUOTES, 'UTF-8');
 

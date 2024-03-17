@@ -2,23 +2,27 @@
 (function($) {
     $(function () {
         // Form Setup
-        var bookingForm = $('#my-booking-plugin-form'); // Store a reference to the booking form for efficiency
+        let bookingForm = $('#my-booking-plugin-form'); // Store a reference to the booking form for efficiency
 
         // Form Submission Handling
         bookingForm.on('submit', function(e) {
             e.preventDefault(); // Stop the form from submitting normally (reloading the page)
-
-            var formData = bookingForm.serialize(); // Collect all form input values into a format for sending
+            
+            let formData = {
+                booking_id: bookingForm.find('[name="booking_id"] option:selected').val(),
+                service_name: bookingForm.find('[name="service_name"] option:selected').val(),
+                client_name: bookingForm.find('[name="name"]').val(),
+                client_email: bookingForm.find('[name="email"]').val(),
+            };
 
             // Send Booking Data to Server (WordPress)
             $.ajax({
                 type: 'POST', 
                 url: MyBookingPlugin.ajax_url,  // Send the data to the backend URL
                 data: {
-                    security: MyBookingPlugin.security,
+                    action: 'book_slot',   
                     data: formData,
-                },                       // Include the collected form data
-                dataType: 'json',                     // Expect the server to respond with JSON data
+                },
 
                 // Handle Successful Booking
                 success: function(response) {

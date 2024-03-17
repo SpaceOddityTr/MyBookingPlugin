@@ -6,9 +6,14 @@
  * Author: Your Name
  */
 
+ define('MBP_MAIN_FILE', __FILE__);
+ define('MBP_ROOT_DIR', plugin_dir_path(__FILE__));
+ define('MBP_ROOT_URL', plugin_dir_url(__FILE__));
+
+
 // Activation Hook: Runs when the plugin is activated
-register_activation_hook(__FILE__, 'Activate');
-function Activate() {
+register_activation_hook(__FILE__, 'activate');
+function activate() {
     // Display PHP error log for debugging (remove in production)
     error_log('Hook activated - activate');
 
@@ -17,13 +22,13 @@ function Activate() {
     $charset_collate = $wpdb->get_charset_collate();
 
     // SQL to create the 'bookings' table
-    $sql = "CREATE TABLE $table_name (
-        id mediumint(9) NOT NULL AUTO_INCREMENT,
-        date date NOT NULL,
-        time time NOT NULL,
-        service_id mediumint(9) NOT NULL,
-        client_name varchar(255) NOT NULL,
-        client_email varchar(255) NOT NULL,
+    $sql = "CREATE TABLE IF NOT EXISTS `$table_name` (
+        `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+        `date` DATE NOT NULL,
+        `time` TIME NOT NULL,
+        `service_name` VARCHAR(255) NULL,
+        `client_name` VARCHAR(255) NULL,
+        `client_email` VARCHAR(255) NULL,
         PRIMARY KEY (id)
     ) $charset_collate;";
 
@@ -32,8 +37,8 @@ function Activate() {
 }
 
 // Deactivation Hook: Runs when the plugin is deactivated
-register_deactivation_hook(__FILE__, 'Deactivate');
-function Deactivate() {
+register_deactivation_hook(__FILE__, 'deactivate');
+function deactivate() {
     // Display PHP error log for debugging (remove in production)
     error_log('Hook activated - deactivate');
 }
@@ -52,20 +57,23 @@ function mybookingplugin_uninstall() {
     $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}bookings");
 }
 
+$rootDir = MBP_ROOT_DIR;
+$url = MBP_ROOT_URL;
+
 // Include plugin class files 
-require_once plugin_dir_path(__FILE__) . 'inc/Admin.php';
-require_once plugin_dir_path(__FILE__) . 'inc/BookingCalendar.php';
-require_once plugin_dir_path(__FILE__) . 'inc/Booking.php';
-require_once plugin_dir_path(__FILE__) . 'inc/PublicSide.php';
-require_once plugin_dir_path(__FILE__) . 'inc/Email.php';
+require_once "{$rootDir}inc/Admin.php";
+require_once "{$rootDir}inc/BookingCalendarController.php";
+require_once "{$rootDir}inc/Booking.php";
+require_once "{$rootDir}inc/PublicSide.php";
+require_once "{$rootDir}inc/Email.php";
+require_once "{$rootDir}inc/View.php";
 
 // Instantiate plugin classes & get the plugin's URL
-$url = plugin_dir_url(__FILE__);
-$admin = new Admin();
-$bookingCalendar = new BookingCalendar($url);
 $booking = new Booking();
-$publicSide = new PublicSide('MyBookingPlugin', '1', $booking, $url);
-$eMail = new EMail();
+$admin = new Admin($rootDir, $booking);
+$bookingCalendar = new BookingCalendarController($url, $booking);
+$publicSide = new PublicSide('MyBookingPlugin', '1', $booking, $url, $rootDir);
+$eMail = new EMail($booking);
 
 add_shortcode('my_booking_form', [$publicSide, 'renderShortcode']);
 

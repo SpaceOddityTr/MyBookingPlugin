@@ -39,6 +39,7 @@
   
       // Configure the booking modal
       modal.dialog({
+        autoOpen: false, // Prevent automatic opening on initialization
         buttons: [ 
           { // Close Button
             text: 'Close',
