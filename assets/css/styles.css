@@ -1,3 +1,3 @@
 .ui-timepicker-container{ 
-    z-index:100200 !important; 
+    z-index:100200 !important; /* Sets the stack order of the timepicker container to ensure it appears on top of other elements. */
 }

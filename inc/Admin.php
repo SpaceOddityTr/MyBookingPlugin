@@ -1,140 +1,146 @@
 <?php
-require_once( plugin_dir_path(__FILE__) . './Booking.php' );
-class Admin {
-    protected $baseDir;
-    protected $booking;  // Declare the property
+// Class definition for the Admin area of a custom WordPress booking plugin
+class Admin
+{
+    protected $baseDir; // Directory path for plugin assets or includes
+    protected $booking; // Instance of Booking class for managing booking operations
 
-    public function __construct(string $baseDir, Booking $booking) {
-        //display PHP error log
+    // Constructor method to initialize the Admin object
+    public function __construct(string $baseDir, Booking $booking)
+    {
+        // Log a message to the PHP error log for debugging purposes
         error_log('Admin class constructor called');
-        $this->booking = $booking;
-        $this->baseDir = $baseDir;
+        $this->booking = $booking; // Assign the Booking instance
+        $this->baseDir = $baseDir; // Set the base directory for plugin resources
 
+        // WordPress hooks to add menu items to the admin dashboard and initialize plugin settings
         add_action('admin_menu', [$this, 'add_admin_menu']);
         add_action('admin_init', [$this, 'settings_init']);
     }
     
-    public function add_admin_menu() {
-        //display PHP error log
+    // Function to add menu and submenu items to the WordPress admin dashboard
+    public function add_admin_menu() 
+    {
+        // Log a message for debugging
         error_log('add_admin_menu called');
 
-        // Top-level menu item
+        // Add a top-level menu item for the booking plugin settings
         add_menu_page(
-            'My Booking Plugin Settings', // Page title 
-            'Booking Settings',           // Menu title 
-            'manage_options',             // Required capability to view the page
-            'my_booking_plugin',          // Menu slug
-            [$this, 'settings_page']      // Callback function to render the page
+            'My Booking Plugin Settings', // The text to be displayed in the title tags of the page when the menu is selected
+            'Booking Settings',           // The text to be used for the menu
+            'manage_options',             // The capability required for this menu to be displayed to the user
+            'my_booking_plugin',          // The slug name to refer to this menu by (should be unique for this menu)
+            [$this, 'settings_page']      // The function to be called to output the content for this page
         );
 
-        // Submenu item (Note the correction to fix nesting)
+        // Add submenu items under the top-level menu created above
         add_submenu_page(
-            'my_booking_plugin',          // Parent slug
-            'Set Availability',
-            'Set Availability',
-            'manage_options',
-            'set_availability',
-            [$this, 'set_availability_page']
+            'my_booking_plugin',          // The slug name for the parent menu
+            'Set Availability',           // The text to be displayed in the title tags of the page when the menu is selected
+            'Set Availability',           // The text to be used for the menu
+            'manage_options',             // The capability required for this menu to be displayed to the user
+            'set_availability',           // The slug name to refer to this menu by (should be unique for this menu)
+            [$this, 'set_availability_page'] // The function to be called to output the content for this page
         );
 
+        // Another submenu item for viewing all bookings
         add_submenu_page(
-            'my_booking_plugin',   // Parent slug
+            'my_booking_plugin',   // Parent menu slug
             'All Bookings',        // Page title
             'All Bookings',        // Menu title
-            'manage_options',      // Required capability
+            'manage_options',      // Capability required
             'all_bookings',        // Menu slug
-            [$this, 'list_all_bookings']
+            [$this, 'list_all_bookings'] // Callback function
         );
     }
     
+    // Initializes plugin settings by registering settings and sections
+    public function settings_init()
+    {
+        // Log a message for debugging
+        error_log('Hook activated - settings init');
 
-    public function settings_init() {
-        //display PHP error log
-        error_log( 'Hook activated - settings init');
-
-        // Register settings group for saving options
+        // Registers a setting for the plugin, which is stored in the WordPress options table
         register_setting('my_booking_plugin', 'my_booking_plugin_admin_email');
 
-        // Settings Section
+        // Add a new section to a settings page
         add_settings_section(
-            'my_booking_plugin_section',
-            __('Booking settings', 'my-booking-plugin'),    // Section title
-            [$this, 'settings_section_callback'],           // Callback to display description
-            'my_booking_plugin'                             // Page the section belongs to
+            'my_booking_plugin_section',                       // Unique identifier for the section
+            __('Booking settings', 'my-booking-plugin'),       // Section title
+            [$this, 'settings_section_callback'],              // Callback function to output the content of the section
+            'my_booking_plugin'                                // The page on which to add this section of options
         );
 
-        // Settings Field: Email for Notifications
+        // Add a new field to a section of a settings page
         add_settings_field(
-            'my_booking_plugin_admin_email',
-            __('Email for Notifications', 'my-booking-plugin'),
-            [$this, 'settings_field_callback'],   // Callback to render the input field
-            'my_booking_plugin',                  // Page to display the field on
-            'my_booking_plugin_section'           // Section to display the field in
+            'my_booking_plugin_admin_email',                    // Unique identifier for the field
+            __('Email for Notifications', 'my-booking-plugin'), // Title of the field
+            [$this, 'settings_field_callback'],                 // Callback function to render the field
+            'my_booking_plugin',                                // The page on which to show the field
+            'my_booking_plugin_section'                         // The section where the field is to be added
         );
     }
 
-
-    public function settings_section_callback() {
-        error_log( 'Hook activated - section callback');
-        echo '<p>This is the description of the settings section.</p>';
+    // Callback for settings section description
+    public function settings_section_callback()
+    {
+        error_log('Hook activated - section callback');
     }
     
-    //Renders HTML for the custom settings field to collect the admin email
-    public function settings_field_callback() {
-        error_log( 'Hook activated - field callback');
+    // Renders HTML for the custom settings field (email input)
+    public function settings_field_callback() 
+    {
+        error_log('Hook activated - field callback');
 
-        // Get saved options, use default if empty
+        // Retrieves the saved value from the database, with a fallback to an empty string if not set
         $option = get_option('my_booking_plugin_admin_email');
-        $field_value = $option !== false
-            ? $option
-            : '';
+        $field_value = $option !== false ? $option : '';
 
-        // Render the email input field
+        // Outputs the HTML input field for the email option
         echo "<input type='text' id='my_booking_plugin_admin_email' name='my_booking_plugin_admin_email' value='". $field_value ."'>";
     }
 
-
-    //Displays the plugin settings page with the settings form and availability management section
-    public function settings_page() {
-        error_log( 'Hook activated - settings page');
+    // Renders the settings page with a form for the plugin settings
+    public function settings_page()
+    {
+        error_log('Hook activated - settings page');
         ?>
         <form action="options.php" method="post">
             <?php
+            // Renders necessary fields for settings registered with 'my_booking_plugin' 
             settings_fields('my_booking_plugin');
             do_settings_sections('my_booking_plugin');
-            submit_button();
+            submit_button(); // Outputs a submit button with the text "Save Changes"
             ?>
         </form>
         <?php
     }
 
-    // Renders the "Set Availability" page
-    public function set_availability_page() {
-        error_log( 'Hook activated - set availability page');
-        include_once __DIR__ . '/../views/Calendar.php';
+    // Callback function to render the "Set Availability" page
+    public function set_availability_page()
+    {
+        error_log('Hook activated - set availability page');
+        include_once __DIR__ . '/../views/Calendar.php'; // Includes the calendar view file
     }
 
+    // Retrieves all bookings and displays them
     public function list_all_bookings()
     {
-        $bookings = $this->booking->getAll();
-        $view = new View("{$this->baseDir}views/admin/bookings-list.php");
-        echo $view->render([
+        $bookings = $this->booking->getAll(); // Get all bookings from the Booking instance
+        $view = new View("{$this->baseDir}views/admin/bookings-list.php"); // Instantiate the View class with the path to the bookings list view
+        echo $view->render([ // Render the view with provided data
             'bookings' => $bookings,
-            'getServiceLabel' =>  function (string $serviceName): string {
-                return $this->getServiceLabel($serviceName);
+            'getServiceLabel' => function (string $serviceName): string
+            {
+                return $this->getServiceLabel($serviceName); // Helper function to format the service name
             },
         ]);
     }
 
-    /**
-     * Retrieves the human-readable service label.
-     *
-     * @param int $serviceName The name of the service.
-     * @return string The lable of the service.
-     */
-    protected function getServiceLabel(string $serviceName): string {
-        $serviceName = str_replace('_', ' ', $serviceName);
-        return ucwords($serviceName);
+    // Helper function to format and return a human-readable label for a service name
+    protected function getServiceLabel(string $serviceName): string
+    {
+        $serviceName = str_replace('_', ' ', $serviceName); // Replace underscores with spaces
+        return ucwords($serviceName); // Capitalize the first letter of each word
     }
-
 }

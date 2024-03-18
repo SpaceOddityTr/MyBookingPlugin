@@ -1,92 +1,92 @@
 /* General Styles for the Booking Form */
 .my-booking-plugin-container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif; /* Example font */
+    max-width: 600px; /* Limits the container's width to 600px to ensure it doesn't stretch too wide */
+    margin: 0 auto; /* Centers the container within its parent element */
+    padding: 20px; /* Adds padding inside the container for spacing around the content */
+    background: #fff; /* Sets a white background for the container */
+    border: 1px solid #ddd; /* Adds a light grey border around the container */
+    border-radius: 4px; /* Rounds the corners of the border for a softer look */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow to give depth */
+    font-family: Arial, sans-serif; /* Sets the default font for text inside the container */
 }
 
 .my-booking-plugin-header {
-    text-align: center;
-    margin-bottom: 30px;
+    text-align: center; /* Centers the header text */
+    margin-bottom: 30px; /* Adds space below the header to separate it from the form */
 }
 
 .my-booking-plugin-header h2 { /* More prominent header */
-    font-size: 1.3em;
-    font-weight: bold; 
+    font-size: 1.3em; /* Increases the font size for the header */
+    font-weight: bold; /* Makes the header text bold */
 }
 
 .my-booking-plugin-form {
-    display: flex;
-    flex-direction: column; 
-    gap: 20px;
+    display: flex; /* Uses Flexbox layout to organize the form elements */
+    flex-direction: column; /* Arranges the form elements in a vertical column */
+    gap: 20px; /* Adds space between each form element */
 }
 
 .my-booking-plugin-form .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 15px; /* Adds space below each form group for separation */
 }
 
 .my-booking-plugin-form label {
-    font-weight: bold;
-    margin-bottom: 5px;
+    font-weight: bold; /* Makes the label text bold */
+    margin-bottom: 5px; /* Adds space below the label before the input/select element */
 }
 
 .my-booking-plugin-form input,
 .my-booking-plugin-form select { 
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 100%;
-    box-sizing: border-box;
+    padding: 10px; /* Adds padding inside the input/select for better readability */
+    border: 1px solid #ddd; /* Adds a light grey border around the input/select */
+    border-radius: 4px; /* Rounds the corners of the input/select */
+    width: 100%; /* Ensures the input/select fills the width of its container */
+    box-sizing: border-box; /* Includes padding and border in the element's total width and height */
 }
 
 .my-booking-plugin-form input[type="submit"] {
-    background-color: #0073aa;
-    color: #fff;
-    border: none;
-    padding: 12px 20px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
+    background-color: #0073aa; /* Sets a blue background for the submit button */
+    color: #fff; /* Sets the text color to white for contrast */
+    border: none; /* Removes the default border */
+    padding: 12px 20px; /* Adds padding inside the button for a larger clickable area */
+    cursor: pointer; /* Changes the cursor to a pointer to indicate it's clickable */
+    border-radius: 4px; /* Rounds the corners of the button */
+    transition: background-color 0.3s ease; /* Animates the background color change on hover/focus */
 }
 
 .my-booking-plugin-form input[type="submit"]:hover,
 .my-booking-plugin-form input[type="submit"]:focus {
-    background-color: #005177; /* More noticeable hover */
+    background-color: #005177; /* Changes the button color on hover/focus for feedback */
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) { 
     .my-booking-plugin-container {
-        width: 90%; 
-    	padding: 10px; /* Reduced padding */
+        width: 90%; /* Adjusts the width to be more responsive on smaller screens */
+        padding: 10px; /* Reduces padding to save space on smaller screens */
     }
 
     .my-booking-plugin-form {
-        gap: 15px; 
+        gap: 15px; /* Adjusts the gap between form elements for smaller screens */
     }
 }
 
 /* Error and Success Messages */
 .my-booking-plugin-message {
-    padding: 10px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    text-align: center;
+    padding: 10px; /* Adds padding inside the message box */
+    border-radius: 4px; /* Rounds the corners of the message box */
+    margin-bottom: 20px; /* Adds space below the message box */
+    text-align: center; /* Centers the message text */
 }
 
 .my-booking-plugin-message-success {
-    background-color: #d4edda;
-    border: 1px solid #c3e6cb;
-    color: #155724;
+    background-color: #d4edda; /* Sets a greenish background for success messages */
+    border: 1px solid #c3e6cb; /* Adds a light green border */
+    color: #155724; /* Sets the text color to dark green */
 }
 
 .my-booking-plugin-message-error {
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
+    background-color: #f8d7da; /* Sets a reddish background for error messages */
+    border: 1px solid #f5c6cb; /* Adds a light red border */
+    color: #721c24; /* Sets the text color to dark red */
 }
