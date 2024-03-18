@@ -1,6 +1,8 @@
 <?php
 /**
  * Represents a view in the MVC architecture. This class is responsible for rendering HTML templates.
+ * 
+ * @package MyBookingPlugin
  */
 class View
 {

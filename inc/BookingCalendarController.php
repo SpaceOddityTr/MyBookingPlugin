@@ -1,5 +1,9 @@
 <?php
-// Extends the Admin class to manage the booking calendar within the WordPress admin area.
+/**
+ * Extends the Admin class to manage the booking calendar within the WordPress admin area.
+ *
+ * @package MyBookingPlugin
+ */
 class BookingCalendarController extends Admin
 {
     protected $baseUrl; // Base URL for the plugin, used to include assets like JS and CSS files.
@@ -195,5 +199,4 @@ class BookingCalendarController extends Admin
         wp_enqueue_script('timepicker');
         wp_enqueue_style('mybookingstyles');
     }
-
 }

@@ -2,6 +2,8 @@
 /**
  * Handles the public-facing functionality of the plugin, including enqueuing scripts and styles,
  * and managing AJAX booking requests.
+ * 
+ * @package MyBookingPlugin
  */
 class PublicSide {
 
@@ -197,7 +199,7 @@ class PublicSide {
         $slots = $this->booking->getAvailable();
 
         // Initialize the view with the path to the booking form template.
-        $view = new View("{$this->baseDir}views/BookingForm.php");
+        $view = new View("{$this->baseDir}views/booking-form.php");
 
         // Render the view with data and return the HTML content.
         return $view->render([

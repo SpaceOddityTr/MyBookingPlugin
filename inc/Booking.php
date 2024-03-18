@@ -2,6 +2,8 @@
 /**
  * Represents a booking within the plugin, encapsulating operations such as
  * creation, retrieval, updating, and deletion of booking records in the database.
+ * 
+ * @package MyBookingPlugin
  */
 class Booking
 {

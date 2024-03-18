@@ -1,5 +1,9 @@
 <?php
-// Class definition for the Admin area of a custom WordPress booking plugin
+/**
+ * Class definition for the Admin area of a custom WordPress booking plugin
+ * 
+ * @package MyBookingPlugin
+ */
 class Admin
 {
     protected $baseDir; // Directory path for plugin assets or includes
@@ -120,7 +124,7 @@ class Admin
     public function set_availability_page()
     {
         error_log('Hook activated - set availability page');
-        include_once __DIR__ . '/../views/Calendar.php'; // Includes the calendar view file
+        include_once __DIR__ . '/../views/calendar.php'; // Includes the calendar view file
     }
 
     // Retrieves all bookings and displays them
