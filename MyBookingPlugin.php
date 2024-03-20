@@ -4,7 +4,7 @@
  * Description: A custom booking system for WordPress.
  * Version: 1.0
  * Author: Your Name
- * 
+ *
  * @package MyBookingPlugin
  */
 
