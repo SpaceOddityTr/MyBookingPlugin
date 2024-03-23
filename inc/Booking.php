@@ -245,11 +245,11 @@ class Booking
 
         // Add conditions for the start and end dates if they are provided.
         if ($startDate !== null) {
-            $conditions[] = "`date` >= '{$startDate}'"; // Note: Ensure dates are properly escaped or parameterized to prevent SQL injection.
+            $conditions[] = "`date` >= '{$startDate}'";
         }
 
         if ($endDate !== null) {
-            $conditions[] = "`date` <= '{$endDate}'"; // Fixed: It should check for <= $endDate instead of < and include proper quoting.
+            $conditions[] = "`date` <= '{$endDate}'";
         }
 
         return implode(' AND ', $conditions); // Combine conditions with AND for SQL query.

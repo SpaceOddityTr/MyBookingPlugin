@@ -136,7 +136,7 @@ class PublicSide {
      * Retrieves all available booking slots and sends them to the frontend.
      * Intended to be used with AJAX to dynamically update available slots on the booking form.
      */
-    public function printAllAvailableBookings() 
+    public function printAllAvailableBookings()
     {
         // Verify the AJAX request to ensure it's coming from the correct source for security.
         check_ajax_referer('mybookingplugin_front_nonce', 'security');
@@ -193,7 +193,7 @@ class PublicSide {
      *
      * @return string The HTML content of the booking form.
      */
-    public function displayBookingForm() 
+    public function displayBookingForm()
     {
         // Retrieve available booking slots.
         $slots = $this->booking->getAvailable();
@@ -210,7 +210,7 @@ class PublicSide {
 
     /**
      * Shortcode handler to display the booking form.
-     * This method can be used to add the booking form to posts, pages, or widgets via the [shortcode].
+     * This method used to add the booking form to website via [shortcode].
      */
     public function renderShortcode() 
     {

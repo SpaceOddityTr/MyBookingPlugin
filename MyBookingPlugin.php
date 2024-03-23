@@ -3,7 +3,7 @@
  * Plugin Name: MyBookingPlugin
  * Description: A custom booking system for WordPress.
  * Version: 1.0
- * Author: Your Name
+ * Author: Dmitrii Sevbo
  *
  * @package MyBookingPlugin
  */
@@ -17,7 +17,6 @@ define('MBP_ROOT_URL', plugin_dir_url(__FILE__)); // Defines the root URL for th
 register_activation_hook(__FILE__, 'activate');
 function activate() {
     error_log('Hook activated - activate'); // Logs a message indicating the plugin is being activated.
-
     global $wpdb; // Global WordPress database access object.
     $table_name = $wpdb->prefix . 'bookings'; // Defines the table name with WP prefix.
     $charset_collate = $wpdb->get_charset_collate(); // Gets the current charset and collation for the database.

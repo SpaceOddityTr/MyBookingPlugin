@@ -96,7 +96,9 @@ class Email {
     {
         // Constructs the email message body with booking details for admin notification.
         $message = sprintf(
-            __("A new booking has been made. Here are the details:<br>Client Name: %s<br>Service: %s<br>Date: %s<br>Time: %s<br><br>Please check the booking system for more details.", 'mybookingplugin'),
+            __("A new booking has been made. 
+            Here are the details:<br>Client Name: %s<br>Service: %s<br>Date: %s<br>Time: %s<br><br>
+            Please check the booking system for more details.", 'mybookingplugin'),
             htmlspecialchars($bookingDetails['client_name'], ENT_QUOTES, 'UTF-8'),
             htmlspecialchars($bookingDetails['service_name'], ENT_QUOTES, 'UTF-8'),
             htmlspecialchars($bookingDetails['date'], ENT_QUOTES, 'UTF-8'),
