@@ -40,6 +40,12 @@ function activate() {
 register_deactivation_hook(__FILE__, 'deactivate');
 function deactivate() {
     error_log('Hook activated - deactivate'); // Logs a message indicating the plugin is being deactivated.
+
+    global $wpdb; 
+    $table_name = $wpdb->prefix . 'bookings';
+
+    // DELETE booking data
+    $wpdb->query("DELETE FROM $table_name");
 }
 
 // Register function to run when the plugin is uninstalled.
